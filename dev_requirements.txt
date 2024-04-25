@@ -1,0 +1,6 @@
+-r requirements.txt
+black==24.4.0
+coverage==7.5.0
+pyright==1.1.360
+pytest==8.1.1
+nodeenv==1.8.0
