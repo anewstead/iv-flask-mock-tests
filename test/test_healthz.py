@@ -2,7 +2,7 @@ import unittest
 from src import app
 
 
-class HealthzEndpointTest(unittest.TestCase):
+class TestHealthzEndpoint(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
         return super().setUp()
