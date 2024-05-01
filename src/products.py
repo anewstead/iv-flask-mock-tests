@@ -1,5 +1,6 @@
 import flask
 from flask import Blueprint
+from .firestore_db import firestore_db
 
 products_blueprint = Blueprint("products", __name__)
 
