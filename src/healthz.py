@@ -1,7 +1,9 @@
-from .app import app
+from flask import Blueprint
+
+healthz_blueprint = Blueprint("healthz", __name__)
 
 
 # make a healthz route
-@app.route("/healthz")
+@healthz_blueprint.route("/")
 def healthz():
     return "ok"

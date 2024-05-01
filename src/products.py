@@ -1,8 +1,10 @@
-from .app import app
 import flask
+from flask import Blueprint
+
+products_blueprint = Blueprint("products", __name__)
 
 
-@app.route("/products", methods=["GET", "POST"])
+@products_blueprint.route("/", methods=["GET", "POST"])
 def products():
     if flask.request.method == "GET":
         # stub method for getting list of products on the platform
@@ -14,7 +16,7 @@ def products():
         return flask.Response(status=405)
 
 
-@app.route("/products/<int:product_id>", methods=["GET", "PUT", "DELETE"])
+@products_blueprint.route("/<int:product_id>", methods=["GET", "PUT", "DELETE"])
 def product_id(product_id):
     if flask.request.method == "GET":
         # stub method for getting a product by id

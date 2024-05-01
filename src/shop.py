@@ -1,8 +1,10 @@
-from .app import app
 import flask
+from flask import Blueprint
+
+shop_blueprint = Blueprint("shop", __name__)
 
 
-@app.route("/shop", methods=["GET", "POST"])
+@shop_blueprint.route("/", methods=["GET", "POST"])
 def shop():
     if flask.request.method == "GET":
         # stub method for getting list of shops
@@ -14,7 +16,7 @@ def shop():
         return flask.Response(status=405)
 
 
-@app.route("/shop/<int:shop_id>", methods=["GET", "PUT", "DELETE"])
+@shop_blueprint.route("/<int:shop_id>", methods=["GET", "PUT", "DELETE"])
 def shop_id(shop_id):
     if flask.request.method == "GET":
         # stub method for getting a shop by id
@@ -29,7 +31,7 @@ def shop_id(shop_id):
         return flask.Response(status=405)
 
 
-@app.route("/shop/<int:shop_id>/products", methods=["GET"])
+@shop_blueprint.route("/<int:shop_id>/products", methods=["GET"])
 def shop_products(shop_id):
     if flask.request.method == "GET":
         # stub method for getting list of products in a shop
@@ -38,8 +40,8 @@ def shop_products(shop_id):
         return flask.Response(status=405)
 
 
-@app.route(
-    "/shop/<int:shop_id>/products/<int:product_id>",
+@shop_blueprint.route(
+    "/<int:shop_id>/products/<int:product_id>",
     methods=["GET", "POST", "PUT", "DELETE"],
 )
 def shop_product_id(shop_id, product_id):

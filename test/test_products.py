@@ -1,5 +1,5 @@
 import unittest
-from src import app
+from src.app import app
 
 
 class TestProductsEndpoints(unittest.TestCase):
