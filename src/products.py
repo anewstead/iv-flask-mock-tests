@@ -68,3 +68,6 @@ def product_id(product_id):
             return flask.Response(status=404)
         product_doc.reference.delete()
         return flask.Response(status=200)
+    else:
+        # we should not even get here as we are not allowing other methods but it feels silly to have no else block
+        return flask.Response(status=405)
