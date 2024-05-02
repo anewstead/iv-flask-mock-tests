@@ -68,19 +68,15 @@ def shop_id(shop_id):
 @shop_blueprint.route("/<shop_id>/products", methods=["GET"])
 def shop_products(shop_id):
     if flask.request.method == "GET":
-        shop_document = (
-            firestore_db.collection(SHOP_COLLECTION_NAME).document(str(shop_id)).get()
+        shop_document = firestore_db.collection(SHOP_COLLECTION_NAME).document(
+            str(shop_id)
         )
-        if not shop_document.exists:
+        if not shop_document.get().exists:
             return flask.Response(
                 status=404, response=f"Shop with id {shop_id} not found"
             )
-        shop_products = (
-            firestore_db.collection(SHOP_COLLECTION_NAME)
-            .document(str(shop_id))
-            .collection(PRODUCTS_COLLECTION_NAME)
-            .get()
-        )
+
+        shop_products = shop_document.collection(PRODUCTS_COLLECTION_NAME).get()
         shop_products_list = [product.to_dict() for product in shop_products]
         return flask.jsonify(shop_products_list)
     else:
@@ -88,15 +84,16 @@ def shop_products(shop_id):
 
 
 @shop_blueprint.route(
-    "/<shop_id>/products/<product_id>",
-    methods=["GET", "POST", "PUT", "DELETE"],
+    "/<shop_id>/products/<product_id>", methods=["GET", "POST", "PUT", "DELETE"]
 )
 def shop_product_id(shop_id, product_id):
+    shop_document = firestore_db.collection(SHOP_COLLECTION_NAME).document(str(shop_id))
+    if not shop_document.get().exists:
+        return flask.Response(status=404, response=f"Shop with id {shop_id} not found")
+
     if flask.request.method == "GET":
         product_in_shop_doc = (
-            firestore_db.collection(SHOP_COLLECTION_NAME)
-            .document(str(shop_id))
-            .collection(PRODUCTS_COLLECTION_NAME)
+            shop_document.collection(PRODUCTS_COLLECTION_NAME)
             .document(str(product_id))
             .get()
         )
@@ -105,26 +102,16 @@ def shop_product_id(shop_id, product_id):
         return flask.jsonify(product_in_shop_doc.to_dict())
 
     elif flask.request.method == "POST":
-        shop_document = (
-            firestore_db.collection(SHOP_COLLECTION_NAME).document(str(shop_id)).get()
+        product_document = firestore_db.collection(PRODUCTS_COLLECTION_NAME).document(
+            str(product_id)
         )
-        if not shop_document.exists:
-            return flask.Response(
-                status=404, response=f"Shop with id {shop_id} not found"
-            )
-        product_document = (
-            firestore_db.collection(PRODUCTS_COLLECTION_NAME)
-            .document(str(product_id))
-            .get()
-        )
-        if not product_document.exists:
+        if not product_document.get().exists:
             return flask.Response(
                 status=404, response=f"Product with id {product_id} not found"
             )
+
         product_in_shop_doc = (
-            firestore_db.collection(SHOP_COLLECTION_NAME)
-            .document(str(shop_id))
-            .collection(PRODUCTS_COLLECTION_NAME)
+            shop_document.collection(PRODUCTS_COLLECTION_NAME)
             .document(str(product_id))
             .get()
         )
@@ -135,7 +122,7 @@ def shop_product_id(shop_id, product_id):
                 response=f"Product with id {product_id} already exists in shop with id {shop_id}",
             )
 
-        product_data = product_document.to_dict()
+        product_data = product_document.get().to_dict()
         product_data.update({"quantity": flask.request.json.get("quantity", 1)})
 
         firestore_db.collection(SHOP_COLLECTION_NAME).document(str(shop_id)).collection(
@@ -150,46 +137,24 @@ def shop_product_id(shop_id, product_id):
             .document(str(shop_id))
             .collection(PRODUCTS_COLLECTION_NAME)
             .document(str(product_id))
-            .get()
         )
-        if not product_in_shop_doc.exists:
+
+        if not product_in_shop_doc.get().exists:
             return flask.Response(status=404)
 
         for key, value in flask.request.json.items():
-            product_in_shop_doc.reference.update({key: value})
+            product_in_shop_doc.get().reference.update({key: value})
         return flask.jsonify({"id": product_id})
+
     elif flask.request.method == "DELETE":
-        if (
-            not firestore_db.collection(SHOP_COLLECTION_NAME)
-            .document(str(shop_id))
-            .get()
-            .exists
-        ):
-            return flask.Response(
-                status=404, response=f"Shop with id {shop_id} not found"
-            )
-
-        if (
-            not firestore_db.collection(PRODUCTS_COLLECTION_NAME)
-            .document(str(product_id))
-            .get()
-            .exists
-        ):
-            return flask.Response(
-                status=404, response=f"Product with id {product_id} not found"
-            )
-
-        product_in_shop_doc = (
-            firestore_db.collection(SHOP_COLLECTION_NAME)
-            .document(str(shop_id))
-            .collection(PRODUCTS_COLLECTION_NAME)
-            .document(str(product_id))
-            .get()
-        )
-        if not product_in_shop_doc.exists:
+        product_in_shop_doc = shop_document.collection(
+            PRODUCTS_COLLECTION_NAME
+        ).document(str(product_id))
+        if not product_in_shop_doc.get().exists:
             return flask.Response(status=404)
-        product_in_shop_doc.reference.delete()
+
+        product_in_shop_doc.get().reference.delete()
         return flask.Response(status=200)
-    else:
-        # we should not even get here as we are not allowing other methods but it feels silly to have no else block
-        return flask.Response(status=405)
+
+    # we should not even get here as we are not allowing other methods but it feels silly to have no else block
+    return flask.Response(status=405)
