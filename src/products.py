@@ -13,7 +13,7 @@ def products():
         products = firestore_db.collection(PRODUCTS_COLLECTION_NAME).get()
         products_list = [product.to_dict() for product in products]
         return flask.jsonify(products_list)
-    else:
+    if flask.request.method == "POST":
         try:
             product_name = flask.request.json["name"]
             product_description = flask.request.json["description"]
@@ -32,42 +32,37 @@ def products():
         )
         return flask.jsonify({"id": product_ref.id})
 
+    return flask.Response(status=405)
+
 
 @products_blueprint.route("/<product_id>", methods=["GET", "PUT", "DELETE"])
 def product_id(product_id):
     if flask.request.method == "GET":
-        product_doc = (
-            firestore_db.collection(PRODUCTS_COLLECTION_NAME)
-            .document(str(product_id))
-            .get()
+        product_doc = firestore_db.collection(PRODUCTS_COLLECTION_NAME).document(
+            str(product_id)
         )
-        if not product_doc.exists:
+        if not product_doc.get().exists:
             return flask.Response(status=404)
-        return flask.jsonify(product_doc.to_dict())
+        return flask.jsonify(product_doc.get().to_dict())
 
-    elif flask.request.method == "PUT":
-        product_doc = (
-            firestore_db.collection(PRODUCTS_COLLECTION_NAME)
-            .document(str(product_id))
-            .get()
+    if flask.request.method == "PUT":
+        product_doc = firestore_db.collection(PRODUCTS_COLLECTION_NAME).document(
+            str(product_id)
         )
-        if not product_doc.exists:
+        if not product_doc.get().exists:
             return flask.Response(status=404)
 
         for key, value in flask.request.json.items():
-            product_doc.reference.update({key: value})
+            product_doc.get().reference.update({key: value})
         return flask.Response(status=200)
 
-    elif flask.request.method == "DELETE":
-        product_doc = (
-            firestore_db.collection(PRODUCTS_COLLECTION_NAME)
-            .document(str(product_id))
-            .get()
+    if flask.request.method == "DELETE":
+        product_doc = firestore_db.collection(PRODUCTS_COLLECTION_NAME).document(
+            str(product_id)
         )
-        if not product_doc.exists:
+        if not product_doc.get().exists:
             return flask.Response(status=404)
-        product_doc.reference.delete()
+        product_doc.get().reference.delete()
         return flask.Response(status=200)
-    else:
-        # we should not even get here as we are not allowing other methods but it feels silly to have no else block
-        return flask.Response(status=405)
+
+    return flask.Response(status=405)
