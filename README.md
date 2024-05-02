@@ -14,5 +14,7 @@ Follow the rules to start up the firebase emulator here: https://github.com/ivic
 Run unit tests with coverage api using: `python3 -m coverage run -m unittest discover test` <br>
 Generate a coverage report after testing using: `python3 -m coverage report` <br>
 
+Or, run it all at once: `python3 -m coverage run -m unittest discover test && coverage report`
+
 ## Type checking
 Run pyright with: `python3 -m pyright .`
