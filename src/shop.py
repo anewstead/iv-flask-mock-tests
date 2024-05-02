@@ -145,11 +145,51 @@ def shop_product_id(shop_id, product_id):
         return flask.jsonify({"id": product_id})
 
     elif flask.request.method == "PUT":
-        # stub method for updating a product in a shop by id
-        raise NotImplementedError
+        product_in_shop_doc = (
+            firestore_db.collection(SHOP_COLLECTION_NAME)
+            .document(str(shop_id))
+            .collection(PRODUCTS_COLLECTION_NAME)
+            .document(str(product_id))
+            .get()
+        )
+        if not product_in_shop_doc.exists:
+            return flask.Response(status=404)
+
+        for key, value in flask.request.json.items():
+            product_in_shop_doc.reference.update({key: value})
+        return flask.jsonify({"id": product_id})
     elif flask.request.method == "DELETE":
-        # stub method for deleting a product in a shop by id
-        raise NotImplementedError
+        if (
+            not firestore_db.collection(SHOP_COLLECTION_NAME)
+            .document(str(shop_id))
+            .get()
+            .exists
+        ):
+            return flask.Response(
+                status=404, response=f"Shop with id {shop_id} not found"
+            )
+
+        if (
+            not firestore_db.collection(PRODUCTS_COLLECTION_NAME)
+            .document(str(product_id))
+            .get()
+            .exists
+        ):
+            return flask.Response(
+                status=404, response=f"Product with id {product_id} not found"
+            )
+
+        product_in_shop_doc = (
+            firestore_db.collection(SHOP_COLLECTION_NAME)
+            .document(str(shop_id))
+            .collection(PRODUCTS_COLLECTION_NAME)
+            .document(str(product_id))
+            .get()
+        )
+        if not product_in_shop_doc.exists:
+            return flask.Response(status=404)
+        product_in_shop_doc.reference.delete()
+        return flask.Response(status=200)
     else:
         # we should not even get here as we are not allowing other methods but it feels silly to have no else block
         return flask.Response(status=405)
