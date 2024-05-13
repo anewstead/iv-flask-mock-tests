@@ -4,3 +4,10 @@ repos:
     hooks:
       - id: black
         args: [--safe]
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.2.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
