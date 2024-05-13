@@ -16,9 +16,9 @@ def products():
         max_price = flask.request.args.get("max_price", None)
 
         if min_price is not None:
-            min_price = int(min_price)
+            min_price = float(min_price)
         if max_price is not None:
-            max_price = int(max_price)
+            max_price = float(max_price)
 
         query = firestore_db.collection(PRODUCTS_COLLECTION_NAME)
 
