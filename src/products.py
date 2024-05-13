@@ -7,6 +7,7 @@ products_blueprint = Blueprint("products", __name__)
 PRODUCTS_COLLECTION_NAME = "products"
 
 
+# TODO: try and use type enumerations for methods
 @products_blueprint.route("/", methods=["GET", "POST"])
 def products():
     if flask.request.method == "GET":
