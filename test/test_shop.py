@@ -185,6 +185,105 @@ class TestShopEndpointAddingProducts(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+class TestShopEndpointGettingProductsInShopWithPriceFilters(unittest.TestCase):
+    def setUp(self):
+        self.app = app.test_client()
+        delete_all_documents(SHOP_COLLECTION_NAME)
+        shop_response = self.app.post(
+            "/shop/",
+            json={
+                "name": random_shop_name,
+                "address": random_shop_address,
+            },
+        )
+        self.shop_id = shop_response.json["id"]
+        product_1 = self.app.post(
+            "/products/",
+            json={
+                "name": "10",
+                "description": "10 quid product",
+                "price": 10,
+            },
+        )
+
+        product_2 = self.app.post(
+            "/products/",
+            json={
+                "name": "20",
+                "description": "20 quid product",
+                "price": 20,
+            },
+        )
+
+        product_3 = self.app.post(
+            "/products/",
+            json={
+                "name": "25",
+                "description": "25 quid product",
+                "price": 25,
+            },
+        )
+
+        product_4 = self.app.post(
+            "/products/",
+            json={
+                "name": "30",
+                "description": "30 quid product",
+                "price": 30,
+            },
+        )
+
+        self.app.post(
+            f"/shop/{self.shop_id}/products/{product_1.json['id']}",
+            json={"quantity": 1},
+        )
+
+        self.app.post(
+            f"/shop/{self.shop_id}/products/{product_2.json['id']}",
+            json={"quantity": 1},
+        )
+
+        self.app.post(
+            f"/shop/{self.shop_id}/products/{product_3.json['id']}",
+            json={"quantity": 1},
+        )
+
+        self.app.post(
+            f"/shop/{self.shop_id}/products/{product_4.json['id']}",
+            json={"quantity": 1},
+        )
+
+        return super().setUp()
+
+    def tearDown(self) -> None:
+        delete_all_documents(SHOP_COLLECTION_NAME)
+        return super().tearDown()
+
+    def test_get_shop_products_with_min_price_filter(self):
+        response = self.app.get(f"/shop/{self.shop_id}/products/?min_price=20")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json), 3)
+        self.assertEqual(response.json[0]["price"], 20)
+        self.assertEqual(response.json[1]["price"], 25)
+        self.assertEqual(response.json[2]["price"], 30)
+
+    def test_get_shop_products_with_max_price_filter(self):
+        response = self.app.get(f"/shop/{self.shop_id}/products/?max_price=20")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json), 2)
+        self.assertEqual(response.json[0]["price"], 10)
+        self.assertEqual(response.json[1]["price"], 20)
+
+    def test_get_shop_products_with_min_and_max_price_filter(self):
+        response = self.app.get(
+            f"/shop/{self.shop_id}/products/?min_price=20&max_price=25"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json), 2)
+        self.assertEqual(response.json[0]["price"], 20)
+        self.assertEqual(response.json[1]["price"], 25)
+
+
 class TestShopEndpointEditingProductsInShop(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()

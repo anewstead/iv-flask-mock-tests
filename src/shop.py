@@ -2,6 +2,8 @@ import flask
 from flask import Blueprint
 from .firestore_db import firestore_db
 from .products import PRODUCTS_COLLECTION_NAME
+from google.cloud.firestore_v1.base_query import FieldFilter
+
 
 SHOP_COLLECTION_NAME = "shops"
 
@@ -70,7 +72,27 @@ def shop_products(shop_id):
                 status=404, response=f"Shop with id {shop_id} not found"
             )
 
-        shop_products = shop_document.collection(PRODUCTS_COLLECTION_NAME).get()
+        min_price = flask.request.args.get("min_price", None)
+        max_price = flask.request.args.get("max_price", None)
+
+        if min_price:
+            min_price = float(min_price)
+        if max_price:
+            max_price = float(max_price)
+
+        shop_products = shop_document.collection(PRODUCTS_COLLECTION_NAME)
+
+        if min_price:
+            shop_products = shop_products.where(
+                filter=FieldFilter("price", ">=", min_price)
+            )
+
+        if max_price:
+            shop_products = shop_products.where(
+                filter=FieldFilter("price", "<=", max_price)
+            )
+
+        shop_products = shop_products.get()
         shop_products_list = [product.to_dict() for product in shop_products]
         return flask.jsonify(shop_products_list)
     else:
