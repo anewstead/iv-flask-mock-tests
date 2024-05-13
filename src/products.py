@@ -1,5 +1,6 @@
 import flask
 from flask import Blueprint
+from google.cloud.firestore_v1.base_query import FieldFilter
 from .firestore_db import firestore_db
 
 products_blueprint = Blueprint("products", __name__)
@@ -11,9 +12,25 @@ PRODUCTS_COLLECTION_NAME = "products"
 @products_blueprint.route("/", methods=["GET", "POST"])
 def products():
     if flask.request.method == "GET":
-        products = firestore_db.collection(PRODUCTS_COLLECTION_NAME).get()
-        products_list = [product.to_dict() for product in products]
+        min_price = flask.request.args.get("min_price", None)
+        max_price = flask.request.args.get("max_price", None)
+
+        if min_price is not None:
+            min_price = int(min_price)
+        if max_price is not None:
+            max_price = int(max_price)
+
+        query = firestore_db.collection(PRODUCTS_COLLECTION_NAME)
+
+        if min_price is not None:
+            query = query.where(filter=FieldFilter("price", ">=", min_price))
+        if max_price is not None:
+            query = query.where(filter=FieldFilter("price", "<=", max_price))
+
+        products_query = query.get()
+        products_list = [product.to_dict() for product in products_query]
         return flask.jsonify(products_list)
+
     if flask.request.method == "POST":
         try:
             product_name = flask.request.json["name"]
