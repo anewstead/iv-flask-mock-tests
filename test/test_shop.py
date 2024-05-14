@@ -1,7 +1,6 @@
 import unittest
 from src.app import app
 from test.common_utilities import delete_all_documents
-from src.shop import SHOP_COLLECTION_NAME
 
 import random
 
@@ -17,11 +16,11 @@ random_product_price = random.randint(1, 100)
 class TestShopEndpoints(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-        delete_all_documents(SHOP_COLLECTION_NAME)
+        delete_all_documents()
         return super().setUp()
 
     def tearDown(self) -> None:
-        delete_all_documents(SHOP_COLLECTION_NAME)
+        delete_all_documents()
         return super().tearDown()
 
     def test_post_shop_raises_key_error(self):
@@ -50,7 +49,7 @@ class TestShopEndpoints(unittest.TestCase):
 class TestShopEndpointsWithShopId(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-        delete_all_documents(SHOP_COLLECTION_NAME)
+        delete_all_documents()
         response = self.app.post(
             "/shop/",
             json={
@@ -62,7 +61,7 @@ class TestShopEndpointsWithShopId(unittest.TestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-        delete_all_documents(SHOP_COLLECTION_NAME)
+        delete_all_documents()
         return super().tearDown()
 
     def test_get_shop_by_id(self):
@@ -109,7 +108,7 @@ class TestShopEndpointsWithShopId(unittest.TestCase):
 class TestShopEndpointAddingProducts(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-        delete_all_documents(SHOP_COLLECTION_NAME)
+        delete_all_documents()
         product_response = self.app.post(
             "/products/",
             json={
@@ -130,7 +129,7 @@ class TestShopEndpointAddingProducts(unittest.TestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-        delete_all_documents(SHOP_COLLECTION_NAME)
+        delete_all_documents()
         return super().tearDown()
 
     def test_get_shop_products(self):
@@ -188,7 +187,7 @@ class TestShopEndpointAddingProducts(unittest.TestCase):
 class TestShopEndpointGettingProductsInShopWithPriceFilters(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-        delete_all_documents(SHOP_COLLECTION_NAME)
+        delete_all_documents()
         shop_response = self.app.post(
             "/shop/",
             json={
@@ -256,7 +255,7 @@ class TestShopEndpointGettingProductsInShopWithPriceFilters(unittest.TestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-        delete_all_documents(SHOP_COLLECTION_NAME)
+        delete_all_documents()
         return super().tearDown()
 
     def test_get_shop_products_with_min_price_filter(self):
@@ -287,7 +286,7 @@ class TestShopEndpointGettingProductsInShopWithPriceFilters(unittest.TestCase):
 class TestShopEndpointEditingProductsInShop(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-        delete_all_documents(SHOP_COLLECTION_NAME)
+        delete_all_documents()
         product_response = self.app.post(
             "/products/",
             json={
@@ -313,7 +312,7 @@ class TestShopEndpointEditingProductsInShop(unittest.TestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-        delete_all_documents(SHOP_COLLECTION_NAME)
+        delete_all_documents()
         return super().tearDown()
 
     def test_post_shop_products_product_already_exists(self):

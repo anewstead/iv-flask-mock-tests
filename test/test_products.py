@@ -1,6 +1,5 @@
 import unittest
 from src.app import app
-from src.products import PRODUCTS_COLLECTION_NAME
 from test.common_utilities import delete_all_documents
 
 import random
@@ -16,11 +15,11 @@ random_product_price = random.randint(1, 100)
 class TestProductsEndpoints(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-        delete_all_documents(PRODUCTS_COLLECTION_NAME)
+        delete_all_documents()
         return super().setUp()
 
     def tearDown(self) -> None:
-        delete_all_documents(PRODUCTS_COLLECTION_NAME)
+        delete_all_documents()
         return super().tearDown()
 
     def test_get_products_empty(self):
@@ -56,7 +55,7 @@ class TestProductsEndpoints(unittest.TestCase):
 class TestProductsEndpointWithPriceFilters(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-        delete_all_documents(PRODUCTS_COLLECTION_NAME)
+        delete_all_documents()
         self.app.post(
             "/products/",
             json={
@@ -92,7 +91,7 @@ class TestProductsEndpointWithPriceFilters(unittest.TestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-        delete_all_documents(PRODUCTS_COLLECTION_NAME)
+        delete_all_documents()
         return super().tearDown()
 
     def test_get_products_with_min_price_filter(self):
@@ -121,7 +120,7 @@ class TestProductsEndpointWithPriceFilters(unittest.TestCase):
 class TestProductsEndpointsWithProductId(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-        delete_all_documents(PRODUCTS_COLLECTION_NAME)
+        delete_all_documents()
         response = self.app.post(
             "/products/",
             json={
@@ -134,7 +133,7 @@ class TestProductsEndpointsWithProductId(unittest.TestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-        delete_all_documents(PRODUCTS_COLLECTION_NAME)
+        delete_all_documents()
         return super().tearDown()
 
     def test_get_product_by_id(self):
